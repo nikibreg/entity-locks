@@ -6,12 +6,12 @@ import { useAuth } from '../app/providers/auth';
 
 export default function Auth() {
     const [isLoading, setIsLoading] = useState(false);
-    const { setIsAuthenticated } = useAuth();
+    const { setUserId } = useAuth();
 
     useEffect(() => {
         const userId = localStorage.getItem('userId');
         if (userId) {
-            setIsAuthenticated(true);
+            setUserId(userId)
         }
     }, []);
 
@@ -31,7 +31,7 @@ export default function Auth() {
             }
             const userId = await response.text();
             localStorage.setItem('userId', userId);
-            setIsAuthenticated(true);
+            setUserId(userId);
         } catch (error) {
             console.error('Authentication error:', error);
         } finally {
