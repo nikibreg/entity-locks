@@ -9,10 +9,8 @@ Our API uses the following setup to handle requests efficiently:
 2. **index.js**:
    - Sends incoming requests to different mini-servers to spread the work.
 
-## [Your Next Cool Feature]
+# UI
 
-[Describe your next awesome addition here]
+## 1 view to rule them all
 
-## [Another Exciting Section]
-
-[More space for your brilliant ideas]
+The veiw is able to display everything in kanban style. Each card displays lock state and actions such as handle, lock and skip (unlocks).
