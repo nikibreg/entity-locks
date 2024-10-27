@@ -9,19 +9,19 @@ const { createClient } = require('@supabase/supabase-js')
 const supabaseUrl = 'https://iblsodkucrgudmsefzsh.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlibHNvZGt1Y3JndWRtc2VmenNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAwNDczODAsImV4cCI6MjA0NTYyMzM4MH0.YDzpmkPPsbBRlULUGnQBVvsNiISVfxhjUoYZ7f58N2Q'
 const supabase = createClient(supabaseUrl, supabaseKey, {
-    
+
 })
 
 for (let i = 0; i < os.cpus().length; i++) {
     const app = express();
-    
+
     initializeHandlers(app)
-        
+
     app.use(cors({
         origin: ['http://localhost:4200', 'http://localhost:3000'],
         credentials: true
     }));
-    
+
     const port = 3000 + i;
     app.listen(port, err => {
         if (err) {
@@ -29,10 +29,10 @@ for (let i = 0; i < os.cpus().length; i++) {
         } else {
             console.log(`Application Server listening on PORT ${port}`);
         }
-    });    
+    });
 }
 
-function initializeHandlers (app, serverName) {
+function initializeHandlers(app, serverName) {
     app.use((req, res, next) => {
         if (req.path === '/auth-simulation') {
             next();
@@ -48,9 +48,9 @@ function initializeHandlers (app, serverName) {
         next();
     })
 
-    app.post('/auth-simulation', async(req, res) => {
+    app.post('/auth-simulation', async (req, res) => {
         const userId = Math.random().toString(36).substring(2, 10);
-        
+
         try {
             await initializeDatabase(userId);
 
@@ -63,7 +63,7 @@ function initializeHandlers (app, serverName) {
     app.get("/tickets", async (req, res) => {
         const { unhandled } = req.query;
         const query = supabase.from('tickets').select('*');
-        
+
         if (unhandled === 'true') {
             query.neq('status', 'handled');
         }
@@ -84,13 +84,13 @@ function initializeHandlers (app, serverName) {
         const query = supabase.from('tickets')
             .select('*')
             .eq('userId', req.user.id);
-        
+
         if (locked === 'true') {
             query.eq('status', 'locked');
         }
 
         if (handled === 'true') {
-            query.eq('status', 'handled'); 
+            query.eq('status', 'handled');
         }
 
         const { data, error } = await query;
@@ -103,9 +103,145 @@ function initializeHandlers (app, serverName) {
         res.json(data);
     });
 
-    app.patch("/tickets/:id/handle", (req, res) => {
-        console.log(`GET request from ${serverName}: ${req.url}`);
-        res.send(`Hello from server ${serverName} - GET request`);
+    app.patch("/tickets/:id/lock", async (req, res) => {
+        const ticketId = req.params.id;
+        const userId = req.user.id;
+
+        try {
+            const { data: ticket, error: fetchError } = await supabase
+                .from('tickets')
+                .select('*')
+                .eq('id', ticketId)
+                .single();
+
+            if (fetchError) {
+                res.status(500).json({ error: fetchError.message });
+                return;
+            }
+
+            if (!ticket) {
+                res.status(404).json({ error: 'Ticket not found' });
+                return;
+            }
+
+            if (ticket.status === 'locked') {
+                res.status(403).json({ error: 'Ticket is already locked' });
+                return;
+            }
+
+            const { error: updateError } = await supabase
+                .from('tickets')
+                .update({
+                    status: 'locked',
+                    userId: userId
+                })
+                .eq('id', ticketId);
+
+            if (updateError) {
+                res.status(500).json({ error: updateError.message });
+                return;
+            }
+
+            res.status(200).json({ message: 'Ticket locked successfully' });
+        } catch (error) {
+            console.error('Error locking ticket:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    });
+
+    app.patch("/tickets/:id/handle", async (req, res) => {
+        const ticketId = req.params.id;
+        const userId = req.user.id;
+
+        try {
+
+            const { data: ticket, error: fetchError } = await supabase
+                .from('tickets')
+                .select('*')
+                .eq('id', ticketId)
+                .single();
+
+            if (fetchError) {
+                res.status(500).json({ error: fetchError.message });
+                return;
+            }
+
+            if (!ticket) {
+                res.status(404).json({ error: 'Ticket not found' });
+                return;
+            }
+
+            if (ticket.status === 'locked' && ticket.userId !== userId) {
+                res.status(403).json({ error: 'Ticket is locked by another user' });
+                return;
+            }
+
+            // Update ticket status to locked and assign to user
+            const { error: updateError } = await supabase
+                .from('tickets')
+                .update({
+                    status: 'handled',
+                    userId: userId
+                })
+                .eq('id', ticketId);
+
+            if (updateError) {
+                res.status(500).json({ error: updateError.message });
+                return;
+            }
+
+            res.status(200).json({ message: 'Ticket handled successfully' });
+        } catch (error) {
+            console.error('Error handling ticket:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    });
+
+     app.patch("/tickets/:id/skip", async (req, res) => {
+        const ticketId = req.params.id;
+        const userId = req.user.id;
+
+        try {
+            const { data: ticket, error: fetchError } = await supabase
+                .from('tickets')
+                .select('*')
+                .eq('id', ticketId)
+                .single();
+
+            if (fetchError) {
+                res.status(500).json({ error: fetchError.message });
+                return;
+            }
+
+            if (!ticket) {
+                res.status(404).json({ error: 'Ticket not found' });
+                return;
+            }
+
+            if (ticket.userId !== userId) {
+                res.status(403).json({ error: 'Can only skip your own locked tickets' });
+                return;
+            }
+
+            // Update ticket status back to open and remove user assignment
+            const { error: updateError } = await supabase
+                .from('tickets')
+                .update({
+                    status: 'open',
+                    userId: null
+                })
+                .eq('id', ticketId);
+
+            if (updateError) {
+                res.status(500).json({ error: updateError.message });
+                return;
+            }
+
+            res.status(200).json({ message: 'Ticket skipped successfully' });
+        } catch (error) {
+            console.error('Error skipping ticket:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
     });
 };
 
@@ -133,7 +269,7 @@ async function initializeDatabase(userId) {
                     userId
                 },
                 {
-                    title: 'Second Ticket', 
+                    title: 'Second Ticket',
                     description: 'Description',
                     comments: ['Initial comment'],
                     status: 'open',
