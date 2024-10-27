@@ -63,7 +63,7 @@ function initializeHandlers(app, serverName) {
         const query = supabase.from('tickets').select('*');
 
         if (unhandled === 'true') {
-            query.neq('status', 'handled');
+            query.neq('status', 'handled').neq('status', 'locked');
         }
 
         const { data, error } = await query;
