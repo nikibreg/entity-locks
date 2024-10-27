@@ -106,16 +106,11 @@ function initializeHandlers(app, serverName) {
         const userId = req.user.id;
 
         try {
-            const { data: ticket, error: fetchError } = await supabase
+            await supabase
                 .from('tickets')
                 .select('*')
                 .eq('id', ticketId)
                 .single();
-
-            if (fetchError) {
-                res.status(500).json({ error: fetchError.message });
-                return;
-            }
 
             if (!ticket) {
                 res.status(404).json({ error: 'Ticket not found' });
@@ -127,18 +122,13 @@ function initializeHandlers(app, serverName) {
                 return;
             }
 
-            const { error: updateError } = await supabase
+            await supabase
                 .from('tickets')
                 .update({
                     status: 'locked',
                     userId: userId
                 })
                 .eq('id', ticketId);
-
-            if (updateError) {
-                res.status(500).json({ error: updateError.message });
-                return;
-            }
 
             res.status(200).json({ message: 'Ticket locked successfully' });
         } catch (error) {
@@ -153,16 +143,11 @@ function initializeHandlers(app, serverName) {
 
         try {
 
-            const { data: ticket, error: fetchError } = await supabase
+            await supabase
                 .from('tickets')
                 .select('*')
                 .eq('id', ticketId)
                 .single();
-
-            if (fetchError) {
-                res.status(500).json({ error: fetchError.message });
-                return;
-            }
 
             if (!ticket) {
                 res.status(404).json({ error: 'Ticket not found' });
@@ -174,19 +159,13 @@ function initializeHandlers(app, serverName) {
                 return;
             }
 
-            // Update ticket status to locked and assign to user
-            const { error: updateError } = await supabase
+            await supabase
                 .from('tickets')
                 .update({
                     status: 'handled',
                     userId: userId
                 })
                 .eq('id', ticketId);
-
-            if (updateError) {
-                res.status(500).json({ error: updateError.message });
-                return;
-            }
 
             res.status(200).json({ message: 'Ticket handled successfully' });
         } catch (error) {
@@ -200,16 +179,11 @@ function initializeHandlers(app, serverName) {
         const userId = req.user.id;
 
         try {
-            const { data: ticket, error: fetchError } = await supabase
+            await supabase
                 .from('tickets')
                 .select('*')
                 .eq('id', ticketId)
                 .single();
-
-            if (fetchError) {
-                res.status(500).json({ error: fetchError.message });
-                return;
-            }
 
             if (!ticket) {
                 res.status(404).json({ error: 'Ticket not found' });
@@ -221,19 +195,13 @@ function initializeHandlers(app, serverName) {
                 return;
             }
 
-            // Update ticket status back to open and remove user assignment
-            const { error: updateError } = await supabase
+            await supabase
                 .from('tickets')
                 .update({
                     status: 'open',
                     userId: null
                 })
                 .eq('id', ticketId);
-
-            if (updateError) {
-                res.status(500).json({ error: updateError.message });
-                return;
-            }
 
             res.status(200).json({ message: 'Ticket skipped successfully' });
         } catch (error) {

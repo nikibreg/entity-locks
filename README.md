@@ -7,7 +7,20 @@
 
 # How It Works
 
+## UI
+
+### 1 view to rule them all
+
+The main veiw is able to display everything in kanban style. Each card displays lock state and actions such as handle, lock and skip (unlocks).
+
+With the auth component we get user ID to simulate an authentication.
+
+
 ## API
+
+There is only one (`status`) field that is utilized for the whole locking mechanism.
+
+We don't store users since we simply don't need them and don't have database level policies.
 
 Our API uses the following setup to handle requests efficiently:
 
@@ -16,8 +29,3 @@ Our API uses the following setup to handle requests efficiently:
 2. **index.js**:
    - Sends incoming requests to different mini-servers to spread the work.
 
-## UI
-
-### 1 view to rule them all
-
-The veiw is able to display everything in kanban style. Each card displays lock state and actions such as handle, lock and skip (unlocks).
