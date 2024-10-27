@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import 'tailwindcss/tailwind.css';
 import "./globals.css";
+
 import { AuthProvider } from "./providers/auth";
 
 export const metadata: Metadata = {
