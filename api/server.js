@@ -33,6 +33,21 @@ for (let i = 0; i < os.cpus().length; i++) {
 }
 
 function initializeHandlers (app, serverName) {
+    app.use((req, res, next) => {
+        if (req.path === '/auth-simulation') {
+            next();
+            return;
+        }
+
+        if (!req.headers.authorization) {
+            res.status(401).json({ error: 'Authorization header required' });
+            return;
+        }
+        const userId = req.headers.authorization;
+        req.user = { id: userId };
+        next();
+    })
+
     app.post('/auth-simulation', async(req, res) => {
         const userId = Math.random().toString(36).substring(2, 10);
         
@@ -50,7 +65,7 @@ function initializeHandlers (app, serverName) {
         const query = supabase.from('tickets').select('*');
         
         if (unhandled === 'true') {
-            query.eq('status', 'unhandled');
+            query.neq('status', 'handled');
         }
 
         const { data, error } = await query;
@@ -65,16 +80,17 @@ function initializeHandlers (app, serverName) {
 
     app.get("/users/me/tickets", async (req, res) => {
         const { locked, handled } = req.query;
+
         const query = supabase.from('tickets')
             .select('*')
             .eq('userId', req.user.id);
         
         if (locked === 'true') {
-            query.eq('isLocked', true);
+            query.eq('status', 'locked');
         }
 
         if (handled === 'true') {
-            query.eq('isHandled', true); 
+            query.eq('status', 'handled'); 
         }
 
         const { data, error } = await query;
@@ -114,9 +130,7 @@ async function initializeDatabase(userId) {
                     comments: ['First comment', 'Second comment', 'Third comment'],
                     status: 'open',
                     createdAt: new Date(),
-                    userId,
-                    isHandled: false,
-                    isLocked: false
+                    userId
                 },
                 {
                     title: 'Second Ticket', 
@@ -124,9 +138,7 @@ async function initializeDatabase(userId) {
                     comments: ['Initial comment'],
                     status: 'open',
                     createdAt: new Date(),
-                    userId,
-                    isHandled: false,
-                    isLocked: false
+                    userId
                 },
                 {
                     title: 'Third Ticket',
@@ -135,8 +147,6 @@ async function initializeDatabase(userId) {
                     status: 'open',
                     createdAt: new Date(),
                     userId,
-                    isHandled: false,
-                    isLocked: false
                 }
             ]);
 
