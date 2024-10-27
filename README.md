@@ -3,6 +3,7 @@
 1. run `cd api; npm i`
 2. then run `npm start`
 3. open a new terminal inside root directory and run `npm i` and then run `npm run dev`
+4. navigate to [localhost:4200](http://localhost:4200)
 
 # How It Works
 
