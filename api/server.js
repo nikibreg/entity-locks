@@ -8,9 +8,7 @@ const { createClient } = require('@supabase/supabase-js')
 
 const supabaseUrl = 'https://iblsodkucrgudmsefzsh.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlibHNvZGt1Y3JndWRtc2VmenNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAwNDczODAsImV4cCI6MjA0NTYyMzM4MH0.YDzpmkPPsbBRlULUGnQBVvsNiISVfxhjUoYZ7f58N2Q'
-const supabase = createClient(supabaseUrl, supabaseKey, {
-
-})
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 for (let i = 0; i < os.cpus().length; i++) {
     const app = express();
