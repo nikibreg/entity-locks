@@ -29,3 +29,5 @@ Our API uses the following setup to handle requests efficiently:
 2. **index.js**:
    - Sends incoming requests to different mini-servers to spread the work.
 
+
+**Alternatively and arguably for more efficiency we could've spawned workers instead of express apps, but the current method is simpler and works well for our use case.**
