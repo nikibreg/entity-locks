@@ -106,7 +106,7 @@ function initializeHandlers(app, serverName) {
         const userId = req.user.id;
 
         try {
-            await supabase
+            const { data: ticket } = await supabase
                 .from('tickets')
                 .select('*')
                 .eq('id', ticketId)
@@ -143,7 +143,7 @@ function initializeHandlers(app, serverName) {
 
         try {
 
-            await supabase
+            const { data: ticket } = await supabase
                 .from('tickets')
                 .select('*')
                 .eq('id', ticketId)
@@ -179,7 +179,7 @@ function initializeHandlers(app, serverName) {
         const userId = req.user.id;
 
         try {
-            await supabase
+            const { data: ticket } = await supabase
                 .from('tickets')
                 .select('*')
                 .eq('id', ticketId)
